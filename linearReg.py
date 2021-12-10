@@ -26,7 +26,8 @@ plt.show()
 
 #scaling
 x_max=x_data.iloc[:,1].max()
-x_data.iloc[:,1]=x_data.iloc[:,1]/x_max
+x_min=x_data.iloc[:,1].min()
+x_data.iloc[:,1]=(x_data.iloc[:,1])/(x_max)
 print(x_max)
 print(x_data)
 
@@ -35,12 +36,10 @@ x_data=np.array(x_data)
 y_data=np.array(y_data).flatten()
 print(x_data.shape)
 print(y_data.shape)
-print(ceta.shape)
 
 #split data train & test 80/20
 trainSize=int(y_data.size*.8)
-testSize=round(y_data.size*.2)
-print(tainSize,testSize)
+print(trainSize,testSize)
 xTrain=x_data[:trainSize]
 xTest=x_data[trainSize:]
 
@@ -50,22 +49,45 @@ yTest=y_data[trainSize:]
 print(xTrain,xTest)
 print(len(yTrain),len(yTest))
 
-alpha=.0001
-
+alpha=.1 
+ceta=np.array([0,0])
 def gradientDescentOneVar():
-    ceta=np.array([0,0])
-    for i in range(1000):
-        y_pred = xTrain.dot(ceta)
-        ceta = ceta - (sum(xTrain.T.dot(y_pred - yTrain))) * alpha * (1 / trainSize)
+    global ceta
+    for i in range(100000):
+        y_pred = xTrain.dot(ceta) 
+        ceta = ceta - ((xTrain.T.dot(y_pred - yTrain)) * alpha * (1 / trainSize))
         ceta0,ceta1=ceta
-        print(MSE(ceta0,ceta1))
-        #print(ceta)
+    print("MSE = ",MSE(ceta0,ceta1))
+    print("Theta: ",ceta)
 
 def MSE(ceta0,ceta1):
     Esum=0
+    xTrain1=xTrain[:,1]
     for i in range(trainSize):
-        Esum+=pow( y_data[i] - (ceta0+ceta1*x_data[i]) , 2)
-    Esum=Esum*(1/trainSize)
+        Esum+=pow( yTrain[i] - (ceta0+ceta1*xTrain1[i]) , 2)
+    Esum=Esum*(1/(2 * trainSize))
     return Esum
 
 gradientDescentOneVar()
+
+plt.scatter(x_data[:,1], y_data,)
+xPoints = np.linspace(0,0.8,5)
+yPoints = [ceta[0] + ceta[1]* x for x in xPoints]
+plt.plot(fitX, fitY,color='red') 
+plt.xlabel("sqft")
+plt.ylabel("price")
+plt.legend()
+plt.show()
+
+def predTest():
+    ytestpred = xTest.dot(ceta)
+    print(ytestpred,yTest)
+
+predTest()
+
+#Trying different alphas
+#alpha = .1       iteration = 100000      MSE =  34012848737.616528
+#alpha = .4       iteration = 10000       MSE =  34012848737.616543
+#alpha = .01      iteration = 10000       MSE =  47225349578.991615
+#alpha = .001     iteration = 50000       MSE =  54442254613.358246
+#alpha = .0001    iteration = 100000      MSE =  62964040240.09301

@@ -26,7 +26,6 @@ plt.show()
 
 #scaling
 x_max=x_data.iloc[:,1].max()
-x_min=x_data.iloc[:,1].min()
 x_data.iloc[:,1]=(x_data.iloc[:,1])/(x_max)
 print(x_max)
 print(x_data)
@@ -39,7 +38,7 @@ print(y_data.shape)
 
 #split data train & test 80/20
 trainSize=int(y_data.size*.8)
-print(trainSize,testSize)
+print(trainSize)
 xTrain=x_data[:trainSize]
 xTest=x_data[trainSize:]
 
@@ -49,15 +48,17 @@ yTest=y_data[trainSize:]
 print(xTrain,xTest)
 print(len(yTrain),len(yTest))
 
-alpha=.1 
+alpha=.4 
 ceta=np.array([0,0])
+mse=[]
 def gradientDescentOneVar():
-    global ceta
-    for i in range(100000):
+    global ceta,mse
+    for i in range(10000):
         y_pred = xTrain.dot(ceta) 
         ceta = ceta - ((xTrain.T.dot(y_pred - yTrain)) * alpha * (1 / trainSize))
         ceta0,ceta1=ceta
-    print("MSE = ",MSE(ceta0,ceta1))
+        mse.append(MSE(ceta0,ceta1))
+    #print("MSE = ",MSE(ceta0,ceta1))
     print("Theta: ",ceta)
 
 def MSE(ceta0,ceta1):
@@ -70,10 +71,16 @@ def MSE(ceta0,ceta1):
 
 gradientDescentOneVar()
 
-plt.scatter(x_data[:,1], y_data,)
+plt.plot(mse, label='Cost Function',c='red') 
+plt.xlabel("Iterations")
+plt.ylabel("Error")
+plt.legend()
+plt.show()
+
+plt.scatter(x_data[:,1], y_data)
 xPoints = np.linspace(0,0.8,5)
 yPoints = [ceta[0] + ceta[1]* x for x in xPoints]
-plt.plot(fitX, fitY,color='red') 
+plt.plot(xPoints, yPoints,color='red',label='Linear Reg best line') 
 plt.xlabel("sqft")
 plt.ylabel("price")
 plt.legend()
@@ -81,7 +88,8 @@ plt.show()
 
 def predTest():
     ytestpred = xTest.dot(ceta)
-    print(ytestpred,yTest)
+    print('Predicted price:',ytestpred)
+    print('Orignal price:',yTest)
 
 predTest()
 
